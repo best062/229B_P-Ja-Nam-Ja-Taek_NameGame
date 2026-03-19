@@ -11,6 +11,7 @@ public class Tile : MonoBehaviour
     [Header("Settings")]
     public int x;
     public int y;
+    public bool isPlayerTile;
     public bool hasShip = false;
     public bool isClicked = false;
     public int shipID = -1;
@@ -26,46 +27,35 @@ public class Tile : MonoBehaviour
 
         startPosition = transform.position;
         gridManager = FindFirstObjectByType(typeof(GridManager)) as GridManager;
+        if (!isPlayerTile)
+        {
+            rend.material.color = Color.gray;
+        }
     }
 
     // Update is called once per frame
     void OnMouseDown()
     {
+        if (isPlayerTile) return;
+        if (!gridManager.isPlayerTurn) return;
         if (isClicked || gridManager.isGameOver) return;
 
         isClicked = true;
-
-        // color hit / miss
-        if (hasShip)
-        {
-            rend.material.color = Color.green;
-
-            if (gridManager.IsShipDestroyed(shipID))
-            {
-                Debug.Log("Ship Destroyed!");
-            }
-        }
-        else
-        {
-            rend.material.color = Color.red;
-        }
-
-        // bounce
-        if (rb != null)
-        {
-            rb.AddForce(Vector3.up * mass, ForceMode.Impulse);
-        }
-
-        // return position
-        StartCoroutine(ReturnToPosition());
-
-        // check win
-        int remaining = gridManager.CountRemainingShips();
+        
+        TakeHit();
+        
+        // 🖥️ Update UI
+        gridManager.UpdateUI();
+        
+        // 🏆 Check Win
+        int remaining = gridManager.CountRemainingShips(gridManager.enemyGrid);
 
         if (remaining == 0)
         {
             Debug.Log("YOU WIN!");
             gridManager.isGameOver = true;
+
+            gridManager.Win.SetActive(true);
         }
     }
     
@@ -79,5 +69,29 @@ public class Tile : MonoBehaviour
 
         // back to start position
         transform.position = startPosition;
+    }
+    
+    public void TakeHit()
+    {
+        if (isClicked) return;
+
+        isClicked = true;
+
+        if (hasShip)
+        {
+            rend.material.color = Color.green;
+        }
+        else
+        {
+            rend.material.color = Color.red;
+        }
+
+        // physics
+        if (rb != null)
+        {
+            rb.AddForce(Vector3.up * mass, ForceMode.Impulse);
+        }
+
+        StartCoroutine(ReturnToPosition());
     }
 }
