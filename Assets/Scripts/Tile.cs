@@ -57,6 +57,8 @@ public class Tile : MonoBehaviour
 
             gridManager.Win.SetActive(true);
         }
+        
+        gridManager.EndPlayerTurn();
     }
     
     IEnumerator ReturnToPosition()

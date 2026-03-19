@@ -14,6 +14,7 @@ public class GridManager : MonoBehaviour
     public TMP_Text Remaining;
     public GameObject Win;
     public TMP_Text turnText;
+    public GameObject shipDestroyedText;
     
     public Tile[,] playerGrid;
     public Tile[,] enemyGrid;
@@ -39,6 +40,8 @@ public class GridManager : MonoBehaviour
         PlaceShip(enemyGrid, 2);
         PlaceShip(enemyGrid, 1);
         PlaceShip(enemyGrid, 1);
+        
+        UpdateTurnUI();
     }
     
     void GenerateGrid(Tile[,] grid, Vector3 offset, bool isPlayer)
@@ -154,14 +157,30 @@ public class GridManager : MonoBehaviour
         Remaining.text = "Remaining: " + remaining;
     }
     
+    void UpdateTurnUI()
+    {
+        if (isPlayerTurn)
+        {
+            turnText.text = "Player Turn";
+        }
+        else
+        {
+            turnText.text = "AI Turn";
+        }
+        
+        turnText.color = isPlayerTurn ? Color.green : Color.red;
+    }
+    
     public void EndPlayerTurn()
     {
         isPlayerTurn = false;
+        UpdateTurnUI();
         StartCoroutine(AITurn());
     }
     
     IEnumerator AITurn()
     {
+        if (isGameOver) yield break;
         yield return new WaitForSeconds(1f);
 
         int x, y;
@@ -192,6 +211,7 @@ public class GridManager : MonoBehaviour
         }
 
         isPlayerTurn = true;
+        UpdateTurnUI();
     }
     
     void AddTargets(int x, int y)
@@ -221,5 +241,19 @@ public class GridManager : MonoBehaviour
                 }
             }
         }
+    }
+    
+    public void ShowShipDestroyed()
+    {
+        StartCoroutine(ShowShipDestroyedRoutine());
+    }
+
+    IEnumerator ShowShipDestroyedRoutine()
+    {
+        shipDestroyedText.SetActive(true);
+
+        yield return new WaitForSeconds(1.5f);
+
+        shipDestroyedText.SetActive(false);
     }
 }
