@@ -8,6 +8,7 @@ public class GridManager : MonoBehaviour
     public GameObject tilePrefab;
     public int width = 7;
     public int height = 7;
+    public bool isGameOver = false;
     
     public Tile[,] grid;
     
