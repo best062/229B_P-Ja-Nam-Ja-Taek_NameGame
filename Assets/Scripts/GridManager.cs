@@ -10,11 +10,15 @@ public class GridManager : MonoBehaviour
     public GameObject tilePrefab;
     public int width = 7;
     public int height = 7;
+    public int shipsToPlace = 5;
+    private int shipsPlaced = 0;
     public bool isGameOver = false;
     public TMP_Text Remaining;
     public GameObject Win;
+    public GameObject Lose;
     public TMP_Text turnText;
     public GameObject shipDestroyedText;
+    public TMP_Text placementText;
     
     public Tile[,] playerGrid;
     public Tile[,] enemyGrid;
@@ -27,6 +31,7 @@ public class GridManager : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        UpdatePlacementUI();
         playerGrid = new Tile[width, height];
         enemyGrid = new Tile[width, height];
 
@@ -154,16 +159,44 @@ public class GridManager : MonoBehaviour
     
     public void PlaceShipManual(int x, int y)
     {
+        if (shipsPlaced >= shipsToPlace) return;
         Tile tile = playerGrid[x, y];
 
         if (tile.hasShip) return;
 
         tile.hasShip = true;
         tile.shipID = currentShipID;
-
         tile.GetComponent<Renderer>().material.color = Color.cyan;
 
         currentShipID++;
+        shipsPlaced++;
+        
+        UpdatePlacementUI();
+        
+        if (shipsPlaced >= shipsToPlace)
+        {
+            isPlacingShips = false;
+            Debug.Log("เริ่มเกม!");
+        }
+    }
+    
+    public bool IsPlacementDone()
+    {
+        return shipsPlaced >= shipsToPlace;
+    }
+    
+    void UpdatePlacementUI()
+    {
+        if (shipsPlaced < shipsToPlace)
+        {
+            placementText.text = "Place Ships: " + shipsPlaced + " / " + shipsToPlace;
+        }
+        else
+        {
+            placementText.text = "Ready to Battle!";
+        }
+        
+        placementText.color = shipsPlaced >= shipsToPlace ? Color.green : Color.white;
     }
     
     public void UpdateUI()
@@ -220,6 +253,18 @@ public class GridManager : MonoBehaviour
         
         Tile tile = playerGrid[x, y];
         tile.TakeHit();
+        int remaining = CountRemainingShips(playerGrid);
+
+        if (remaining == 0)
+        {
+            yield return new WaitForSeconds(0.5f);
+            Debug.Log("YOU LOSE!");
+            isGameOver = true;
+
+            Lose.SetActive(true);
+            yield break; 
+        }
+        
         if (tile.hasShip)
         {
             AddTargets(x, y);

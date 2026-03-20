@@ -41,6 +41,14 @@ public class Tile : MonoBehaviour
             gridManager.PlaceShipManual(x, y);
             return;
         }
+        
+        if (!gridManager.IsPlacementDone())
+        {
+            Debug.Log("วางเรือให้ครบก่อน!");
+            return;
+        }
+        
+        if (!gridManager.IsPlacementDone()) return;
         if (isPlayerTile) return;
         if (!gridManager.isPlayerTurn) return;
         if (isClicked || gridManager.isGameOver) return;
