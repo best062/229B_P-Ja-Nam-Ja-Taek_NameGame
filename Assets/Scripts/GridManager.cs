@@ -20,6 +20,7 @@ public class GridManager : MonoBehaviour
     public Tile[,] enemyGrid;
     public bool isPlayerTurn = true;
     List<Vector2Int> targets = new List<Vector2Int>();
+    public bool isPlacingShips = true;
     
     int currentShipID = 0;
     
@@ -149,6 +150,20 @@ public class GridManager : MonoBehaviour
         }
 
         return true;
+    }
+    
+    public void PlaceShipManual(int x, int y)
+    {
+        Tile tile = playerGrid[x, y];
+
+        if (tile.hasShip) return;
+
+        tile.hasShip = true;
+        tile.shipID = currentShipID;
+
+        tile.GetComponent<Renderer>().material.color = Color.cyan;
+
+        currentShipID++;
     }
     
     public void UpdateUI()

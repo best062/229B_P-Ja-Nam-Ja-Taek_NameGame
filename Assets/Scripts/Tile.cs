@@ -36,28 +36,31 @@ public class Tile : MonoBehaviour
     // Update is called once per frame
     void OnMouseDown()
     {
+        if (gridManager.isPlacingShips && isPlayerTile)
+        {
+            gridManager.PlaceShipManual(x, y);
+            return;
+        }
         if (isPlayerTile) return;
         if (!gridManager.isPlayerTurn) return;
         if (isClicked || gridManager.isGameOver) return;
 
-        isClicked = true;
-        
         TakeHit();
         
         // 🖥️ Update UI
         gridManager.UpdateUI();
-        
-        // 🏆 Check Win
+
         int remaining = gridManager.CountRemainingShips(gridManager.enemyGrid);
 
+        // 🏆 Check Win
         if (remaining == 0)
         {
             Debug.Log("YOU WIN!");
             gridManager.isGameOver = true;
-
             gridManager.Win.SetActive(true);
+            return;
         }
-        
+
         gridManager.EndPlayerTurn();
     }
     
