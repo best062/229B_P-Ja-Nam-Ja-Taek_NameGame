@@ -11,12 +11,18 @@ public class GridManager : MonoBehaviour
     public int width = 7;
     public int height = 7;
     public bool isGameOver = false;
+    
+    [Header("UI Settings")]
     public TMP_Text Remaining;
     public GameObject Win;
     public GameObject Lose;
     public TMP_Text turnText;
     public GameObject shipDestroyedText;
     public TMP_Text placementText;
+    
+    [Header("Camera Settings")]
+    public Camera playerCam;
+    public Camera enemyCam;
     
     public Tile[,] playerGrid;
     public Tile[,] enemyGrid;
@@ -184,6 +190,7 @@ public class GridManager : MonoBehaviour
             Tile t = playerGrid[nx, ny];
             t.hasShip = true;
             t.shipID = currentShipID;
+            t.state = Tile.TileState.Ship;
             t.GetComponent<Renderer>().material.color = Color.cyan;
         }
 
@@ -192,18 +199,37 @@ public class GridManager : MonoBehaviour
 
         UpdatePlacementUI();
         ClearPreview();
+        
+        if (IsPlacementDone())
+        {
+            isPlacingShips = false;
+            isPlayerTurn = true;
+
+            // ⭐ สลับกล้องทันที
+            playerCam.gameObject.SetActive(false);
+            enemyCam.gameObject.SetActive(true);
+
+            Debug.Log("Battle Start!");
+        }
     }
     
     void ClearPreview()
     {
         foreach (Tile t in previewTiles)
         {
-            if (!t.hasShip && !t.isClicked)
+            if (t.isClicked) continue; // ⭐ ห้ามแตะ
+
+            switch (t.state)
             {
-                t.ResetColor();
+                case Tile.TileState.Empty:
+                    t.GetComponent<Renderer>().material.color = Color.white;
+                    break;
+
+                case Tile.TileState.Ship:
+                    t.GetComponent<Renderer>().material.color = Color.cyan;
+                    break;
             }
         }
-
         previewTiles.Clear();
     }
 
@@ -240,6 +266,11 @@ public class GridManager : MonoBehaviour
             {
                 // 🔵 หรือ 🔴 ตาม valid
                 r.material.color = canPlace ? validColor : invalidColor;
+            }
+            
+            if (t.isClicked)
+            {
+                continue; // ⭐ สำคัญมาก
             }
             
             if (!previewTiles.Contains(t))
@@ -295,6 +326,8 @@ public class GridManager : MonoBehaviour
     public void EndPlayerTurn()
     {
         isPlayerTurn = false;
+        playerCam.gameObject.SetActive(true);
+        enemyCam.gameObject.SetActive(false);
         UpdateTurnUI();
         StartCoroutine(AITurn());
     }
@@ -326,6 +359,7 @@ public class GridManager : MonoBehaviour
         
         Tile tile = playerGrid[x, y];
         tile.TakeHit();
+        yield return new WaitForSeconds(2f);
         int remaining = CountRemainingShips(playerGrid);
 
         if (remaining == 0)
@@ -344,6 +378,8 @@ public class GridManager : MonoBehaviour
         }
 
         isPlayerTurn = true;
+        playerCam.gameObject.SetActive(false);
+        enemyCam.gameObject.SetActive(true);
         UpdateTurnUI();
     }
     

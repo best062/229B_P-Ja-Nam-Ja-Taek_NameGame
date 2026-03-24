@@ -16,6 +16,7 @@ public class Tile : MonoBehaviour
     public bool isClicked = false;
     public int shipID = -1;
     public Color defaultColor = Color.white;
+    bool isWaiting = false;
     
     [Header("Physics")]
     public float mass = 1f;
@@ -33,6 +34,16 @@ public class Tile : MonoBehaviour
             rend.material.color = Color.gray;
         }
     }
+    
+    public enum TileState
+    {
+        Empty,
+        Ship,
+        Hit,
+        Miss
+    }
+
+    public TileState state = TileState.Empty;
     
     public void ResetColor()
     {
@@ -75,8 +86,9 @@ public class Tile : MonoBehaviour
             gridManager.Win.SetActive(true);
             return;
         }
-
-        gridManager.EndPlayerTurn();
+        
+        StartCoroutine(EndTurnDelay());
+        if (isWaiting) return;
     }
     
     void OnMouseEnter()
@@ -107,10 +119,12 @@ public class Tile : MonoBehaviour
 
         if (hasShip)
         {
+            state = TileState.Hit;
             rend.material.color = Color.green;
         }
         else
         {
+            state = TileState.Miss;
             rend.material.color = Color.red;
         }
 
@@ -121,5 +135,13 @@ public class Tile : MonoBehaviour
         }
 
         StartCoroutine(ReturnToPosition());
+    }
+    
+    IEnumerator EndTurnDelay()
+    {
+        isWaiting = true;
+        yield return new WaitForSeconds(2f);
+        isWaiting = false;
+        gridManager.EndPlayerTurn();
     }
 }
