@@ -10,8 +10,6 @@ public class GridManager : MonoBehaviour
     public GameObject tilePrefab;
     public int width = 7;
     public int height = 7;
-    public int shipsToPlace = 5;
-    private int shipsPlaced = 0;
     public bool isGameOver = false;
     public TMP_Text Remaining;
     public GameObject Win;
@@ -26,6 +24,15 @@ public class GridManager : MonoBehaviour
     List<Vector2Int> targets = new List<Vector2Int>();
     public bool isPlacingShips = true;
     
+    // boat sizes
+    int[] shipSizes = {4, 3, 3, 2, 2, 1, 1};
+    int currentShipIndex = 0;
+    public bool isHorizontal = true;
+    
+    //preview placement
+    List<Tile> previewTiles = new List<Tile>();
+    
+    // current boat
     int currentShipID = 0;
     
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -159,44 +166,110 @@ public class GridManager : MonoBehaviour
     
     public void PlaceShipManual(int x, int y)
     {
-        if (shipsPlaced >= shipsToPlace) return;
-        Tile tile = playerGrid[x, y];
+        if (currentShipIndex >= shipSizes.Length) return;
 
-        if (tile.hasShip) return;
+        int size = shipSizes[currentShipIndex];
 
-        tile.hasShip = true;
-        tile.shipID = currentShipID;
-        tile.GetComponent<Renderer>().material.color = Color.cyan;
+        if (!CanPlaceShip(playerGrid, x, y, size, isHorizontal))
+        {
+            Debug.Log("วางไม่ได้!");
+            return;
+        }
+
+        for (int i = 0; i < size; i++)
+        {
+            int nx = x + (isHorizontal ? i : 0);
+            int ny = y + (isHorizontal ? 0 : i);
+
+            Tile t = playerGrid[nx, ny];
+            t.hasShip = true;
+            t.shipID = currentShipID;
+            t.GetComponent<Renderer>().material.color = Color.cyan;
+        }
 
         currentShipID++;
-        shipsPlaced++;
-        
+        currentShipIndex++; // ⭐ สำคัญ
+
         UpdatePlacementUI();
-        
-        if (shipsPlaced >= shipsToPlace)
+        ClearPreview();
+    }
+    
+    void ClearPreview()
+    {
+        foreach (Tile t in previewTiles)
         {
-            isPlacingShips = false;
-            Debug.Log("เริ่มเกม!");
+            if (!t.hasShip && !t.isClicked)
+            {
+                t.ResetColor();
+            }
+        }
+
+        previewTiles.Clear();
+    }
+
+    public void ShowPreview(int x, int y)
+    {
+        if (IsPlacementDone()) return;
+
+        int size = shipSizes[currentShipIndex];
+
+        bool canPlace = CanPlaceShip(playerGrid, x, y, size, isHorizontal);
+
+        Color validColor = new Color(0, 1, 1, 0.5f);
+        Color invalidColor = new Color(1, 0, 0, 0.5f);
+
+        for (int i = 0; i < size; i++)
+        {
+            int nx = x + (isHorizontal ? i : 0);
+            int ny = y + (isHorizontal ? 0 : i);
+
+            // กันหลุด grid
+            if (nx < 0 || nx >= width || ny < 0 || ny >= height)
+                continue;
+
+            Tile t = playerGrid[nx, ny];
+
+            Renderer r = t.GetComponent<Renderer>();
+
+            if (t.hasShip)
+            {
+                // 🔴 ชนจริง
+                r.material.color = new Color(1, 0, 0, 0.8f);
+            }
+            else
+            {
+                // 🔵 หรือ 🔴 ตาม valid
+                r.material.color = canPlace ? validColor : invalidColor;
+            }
+            
+            if (!previewTiles.Contains(t))
+            {
+                previewTiles.Add(t);
+            }
+            
         }
     }
     
     public bool IsPlacementDone()
     {
-        return shipsPlaced >= shipsToPlace;
+        return currentShipIndex >= shipSizes.Length;
     }
     
     void UpdatePlacementUI()
     {
-        if (shipsPlaced < shipsToPlace)
+        if (!IsPlacementDone())
         {
-            placementText.text = "Place Ships: " + shipsPlaced + " / " + shipsToPlace;
+            int size = shipSizes[currentShipIndex];
+
+            placementText.text = "Placing Ship: Size " + size +
+                                 (isHorizontal ? " (Horizontal)" : " (Vertical)");
         }
         else
         {
             placementText.text = "Ready to Battle!";
         }
-        
-        placementText.color = shipsPlaced >= shipsToPlace ? Color.green : Color.white;
+
+        placementText.color = IsPlacementDone() ? Color.green : Color.white;
     }
     
     public void UpdateUI()
@@ -315,5 +388,37 @@ public class GridManager : MonoBehaviour
         yield return new WaitForSeconds(1.5f);
 
         shipDestroyedText.SetActive(false);
+    }
+    
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            isHorizontal = !isHorizontal;
+            Debug.Log(isHorizontal ? "Horizontal" : "Vertical");
+            UpdatePlacementUI(); // ⭐ ให้ UI เปลี่ยนด้วย
+        }
+        if (!isPlacingShips) return;
+        UpdatePreviewByMouse();
+    }
+    
+    void UpdatePreviewByMouse()
+    {
+        // ❌ ถ้าไม่โดน tile → ล้าง
+        ClearPreview();
+        
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        RaycastHit hit;
+
+        if (Physics.Raycast(ray, out hit))
+        {
+            Tile t = hit.collider.GetComponent<Tile>();
+
+            if (t != null && t.isPlayerTile)
+            {
+                ShowPreview(t.x, t.y);
+            }
+        }
+        
     }
 }

@@ -15,6 +15,7 @@ public class Tile : MonoBehaviour
     public bool hasShip = false;
     public bool isClicked = false;
     public int shipID = -1;
+    public Color defaultColor = Color.white;
     
     [Header("Physics")]
     public float mass = 1f;
@@ -31,6 +32,11 @@ public class Tile : MonoBehaviour
         {
             rend.material.color = Color.gray;
         }
+    }
+    
+    public void ResetColor()
+    {
+        rend.material.color = defaultColor;
     }
 
     // Update is called once per frame
@@ -51,6 +57,7 @@ public class Tile : MonoBehaviour
         if (!gridManager.IsPlacementDone()) return;
         if (isPlayerTile) return;
         if (!gridManager.isPlayerTurn) return;
+        if (!gridManager.IsPlacementDone()) return;
         if (isClicked || gridManager.isGameOver) return;
 
         TakeHit();
@@ -70,6 +77,14 @@ public class Tile : MonoBehaviour
         }
 
         gridManager.EndPlayerTurn();
+    }
+    
+    void OnMouseEnter()
+    {
+        if (isPlayerTile && gridManager.isPlacingShips)
+        {
+            gridManager.ShowPreview(x, y);
+        }
     }
     
     IEnumerator ReturnToPosition()
