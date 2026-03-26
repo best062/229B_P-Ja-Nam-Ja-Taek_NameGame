@@ -7,6 +7,7 @@ public class Tile : MonoBehaviour
     private Renderer rend;
     private Rigidbody rb;
     private Vector3 startPosition;
+    public SkillManager skillManager;
     
     [Header("Settings")]
     public int x;
@@ -26,6 +27,7 @@ public class Tile : MonoBehaviour
     {
         rend = GetComponent<Renderer>();
         rb = GetComponent<Rigidbody>();
+        skillManager = FindFirstObjectByType<SkillManager>();
 
         startPosition = transform.position;
         gridManager = FindFirstObjectByType(typeof(GridManager)) as GridManager;
@@ -42,7 +44,6 @@ public class Tile : MonoBehaviour
         Hit,
         Miss
     }
-
     public TileState state = TileState.Empty;
     
     public void ResetColor()
@@ -71,7 +72,7 @@ public class Tile : MonoBehaviour
         if (!gridManager.IsPlacementDone()) return;
         if (isClicked || gridManager.isGameOver) return;
 
-        TakeHit();
+        skillManager.UseSkill(x, y);
         
         // 🖥️ Update UI
         gridManager.UpdateUI();
