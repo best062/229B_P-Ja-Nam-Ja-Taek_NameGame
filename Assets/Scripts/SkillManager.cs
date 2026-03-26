@@ -1,10 +1,20 @@
 using UnityEngine;
 using System.Collections;
+using TMPro;
+using UnityEngine.UI;
 
 public class SkillManager : MonoBehaviour
 {
     public GridManager gridManager;
+    
+    [Header("Settings")]
+    public TMP_Text bombText;
+    public TMP_Text scanText;
+    public Button bombButton;
+    public Button scanButton;
+    public Button normalButton;
 
+    
     public enum SkillType
     {
         Normal,
@@ -18,52 +28,58 @@ public class SkillManager : MonoBehaviour
     public int scanCount = 3;
 
     
+    void Start()
+    {
+        UpdateSkillUI();
+    }
+    
     // SET SKILL
     public void SetNormal()
     {
         currentSkill = SkillType.Normal;
+        UpdateSkillUI();
     }
-
     public void SetBomb()
     {
         if (bombCount <= 0) return;
 
         currentSkill = SkillType.Bomb;
+        UpdateSkillUI();
     }
-
     public void SetScan()
     {
         if (scanCount <= 0) return;
 
         currentSkill = SkillType.Scan;
+        UpdateSkillUI();
     }
-
     
     // USE SKILL
     public void UseSkill(int x, int y)
     {
+        if (!gridManager.isPlayerTurn) return;
+        
         switch (currentSkill)
         {
             case SkillType.Normal:
                 gridManager.enemyGrid[x, y].TakeHit();
-                gridManager.StartCoroutine(EndTurnDelay());
                 break;
-
+            
             case SkillType.Bomb:
                 BombAttack(x, y);
                 bombCount--;
                 currentSkill = SkillType.Normal;
-                gridManager.StartCoroutine(EndTurnDelay());
+                UpdateSkillUI();
                 break;
-
+            
             case SkillType.Scan:
                 Scan(x, y);
                 scanCount--;
                 currentSkill = SkillType.Normal;
+                UpdateSkillUI();
                 break;
         }
-    }
-
+    } 
     
     // BOMB
     void BombAttack(int x, int y)
@@ -89,7 +105,6 @@ public class SkillManager : MonoBehaviour
             }
         }
     }
-
     
     // SCAN
     void Scan(int x, int y)
@@ -102,7 +117,7 @@ public class SkillManager : MonoBehaviour
         }
         else
         {
-            t.GetComponent<Renderer>().material.color = Color.black;
+            t.GetComponent<Renderer>().material.color = Color.red;
         }
 
         gridManager.StartCoroutine(ResetScanColor(t));
@@ -110,19 +125,46 @@ public class SkillManager : MonoBehaviour
 
     IEnumerator ResetScanColor(Tile t)
     {
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSeconds(1.5f);
 
         if (!t.isClicked)
         {
             t.ResetColor();
         }
     }
-
     
     // DELAY
     IEnumerator EndTurnDelay()
     {
         yield return new WaitForSeconds(2f);
         gridManager.EndPlayerTurn();
+    }
+    
+    //Update UI
+    void UpdateSkillUI()
+    {
+        // 🔢 จำนวน
+        bombText.text = "Skill: Bomb (" + bombCount + ")";
+        scanText.text = "Skill: Scan (" + scanCount + ")";
+
+        // 🔒 ปิดปุ่มเมื่อหมด
+        bombButton.interactable = bombCount > 0;
+        scanButton.interactable = scanCount > 0;
+
+        // 🎨 highlight ปุ่ม
+        normalButton.image.color = currentSkill == SkillType.Normal ? Color.green : Color.white;
+        bombButton.image.color   = currentSkill == SkillType.Bomb   ? Color.green : Color.white;
+        scanButton.image.color   = currentSkill == SkillType.Scan   ? Color.green : Color.white;
+        
+        //ใช้หมด
+        if (bombCount <= 0)
+        {
+            bombButton.image.color = Color.gray;
+        }
+
+        if (scanCount <= 0)
+        {
+            scanButton.image.color = Color.gray;
+        }
     }
 }

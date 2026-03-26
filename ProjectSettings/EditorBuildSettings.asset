@@ -9,8 +9,8 @@ EditorBuildSettings:
     path: Assets/Scenes/Start(Not Done).unity
     guid: ed7d49f1c393d4c4a900e49652ec7f72
   - enabled: 1
-    path: Assets/Scenes/Main.unity
-    guid: 9fc0d4010bbf28b4594072e72b8655ab
+    path: Assets/Scenes/Main2.unity
+    guid: 7a3fecfe5f29f934492ba20942f0bf22
   - enabled: 1
     path: Assets/Scenes/End(Not Done).unity
     guid: 2dc26c61ab36f2d4aabd0bc8a3e34aa4

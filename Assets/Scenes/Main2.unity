@@ -606,6 +606,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SkillManager
   gridManager: {fileID: 1655909505}
+  bombText: {fileID: 1873311479}
+  scanText: {fileID: 245960939}
+  bombButton: {fileID: 483414157}
+  scanButton: {fileID: 509727486}
+  normalButton: {fileID: 1256116746}
   currentSkill: 0
   bombCount: 2
   scanCount: 3

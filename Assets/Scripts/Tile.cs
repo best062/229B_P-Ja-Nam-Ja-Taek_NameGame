@@ -18,6 +18,7 @@ public class Tile : MonoBehaviour
     public int shipID = -1;
     public Color defaultColor = Color.white;
     bool isWaiting = false;
+    bool isProcessingTurn = false;
     
     [Header("Physics")]
     public float mass = 1f;
@@ -66,30 +67,20 @@ public class Tile : MonoBehaviour
             return;
         }
         
+        if (isProcessingTurn) return;
         if (!gridManager.IsPlacementDone()) return;
         if (isPlayerTile) return;
         if (!gridManager.isPlayerTurn) return;
         if (!gridManager.IsPlacementDone()) return;
         if (isClicked || gridManager.isGameOver) return;
-
+        if (isWaiting) return;
+        
+        isProcessingTurn = true;
         skillManager.UseSkill(x, y);
+        StartCoroutine(EndTurnDelay());
         
         // 🖥️ Update UI
         gridManager.UpdateUI();
-
-        int remaining = gridManager.CountRemainingShips(gridManager.enemyGrid);
-
-        // 🏆 Check Win
-        if (remaining == 0)
-        {
-            Debug.Log("YOU WIN!");
-            gridManager.isGameOver = true;
-            gridManager.Win.SetActive(true);
-            return;
-        }
-        
-        StartCoroutine(EndTurnDelay());
-        if (isWaiting) return;
     }
     
     void OnMouseEnter()
@@ -142,6 +133,7 @@ public class Tile : MonoBehaviour
     {
         isWaiting = true;
         yield return new WaitForSeconds(2f);
+        isProcessingTurn = false;
         isWaiting = false;
         gridManager.EndPlayerTurn();
     }

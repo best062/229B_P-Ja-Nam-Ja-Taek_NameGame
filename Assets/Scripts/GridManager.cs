@@ -27,6 +27,7 @@ public class GridManager : MonoBehaviour
     public Tile[,] playerGrid;
     public Tile[,] enemyGrid;
     public bool isPlayerTurn = true;
+    bool isAITurnRunning = false;
     List<Vector2Int> targets = new List<Vector2Int>();
     public bool isPlacingShips = true;
     
@@ -40,6 +41,16 @@ public class GridManager : MonoBehaviour
     
     // current boat
     int currentShipID = 0;
+    
+    //int AI shot count
+    int GetAIShotCount()
+    {
+        int rand = Random.Range(0, 100);
+
+        if (rand < 75) return 1;
+        else if (rand < 95) return 2;
+        else return 3;
+    }
     
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -325,6 +336,16 @@ public class GridManager : MonoBehaviour
     
     public void EndPlayerTurn()
     {
+        // 🏆 Check Win
+        int remaining = CountRemainingShips(enemyGrid);
+        if (remaining == 0)
+        {
+            Debug.Log("YOU WIN!");
+            isGameOver = true;
+            Win.SetActive(true);
+            return;
+        }
+        
         isPlayerTurn = false;
         playerCam.gameObject.SetActive(true);
         enemyCam.gameObject.SetActive(false);
@@ -335,57 +356,81 @@ public class GridManager : MonoBehaviour
     IEnumerator AITurn()
     {
         if (isGameOver) yield break;
+        if (isAITurnRunning) yield break;
+
+        isAITurnRunning = true;
+
         yield return new WaitForSeconds(1f);
 
-        int x, y;
-        
-        if (targets.Count > 0)
+        int shots = GetAIShotCount();
+
+        for (int i = 0; i < shots; i++)
         {
-            Vector2Int t = targets[0];
-            targets.RemoveAt(0);
-        
-            x = t.x;
-            y = t.y;
-        }
-        else
-        {
-            do
+            yield return new WaitForSeconds(Random.Range(0.5f, 0.9f));
+
+            int x, y;
+
+            // 🎯 ถ้ามี target → ยิงต่อเนื่อง
+            if (targets.Count > 0)
+            {
+                Vector2Int t = targets[0];
+                targets.RemoveAt(0);
+
+                x = t.x;
+                y = t.y;
+            }
+            else
             {
                 x = Random.Range(0, width);
                 y = Random.Range(0, height);
             }
-            while (playerGrid[x, y].isClicked);
-        }
-        
-        Tile tile = playerGrid[x, y];
-        tile.TakeHit();
-        yield return new WaitForSeconds(2f);
-        int remaining = CountRemainingShips(playerGrid);
 
-        if (remaining == 0)
-        {
-            yield return new WaitForSeconds(0.5f);
-            Debug.Log("YOU LOSE!");
-            isGameOver = true;
+            Tile tile = playerGrid[x, y];
 
-            Lose.SetActive(true);
-            yield break; 
-        }
-        
-        if (tile.hasShip)
-        {
-            AddTargets(x, y);
+            // ❌ กันยิงซ้ำ
+            if (tile.isClicked)
+            {
+                i--;
+                continue;
+            }
+
+            tile.TakeHit();
+
+            // 🎯 ถ้ายิงโดน → เพิ่ม target รอบๆ
+            if (tile.hasShip)
+            {
+                AddTargets(x, y);
+            }
+
+            // 🧠 เช็คแพ้ทันที
+            int remaining = CountRemainingShips(playerGrid);
+            if (remaining == 0)
+            {
+                yield return new WaitForSeconds(0.5f);
+
+                Debug.Log("YOU LOSE!");
+                isGameOver = true;
+                Lose.SetActive(true);
+
+                isAITurnRunning = false;
+                yield break;
+            }
         }
 
+        // 🔄 จบเทิร์น AI
+        isAITurnRunning = false;
         isPlayerTurn = true;
+
         playerCam.gameObject.SetActive(false);
         enemyCam.gameObject.SetActive(true);
+
         UpdateTurnUI();
     }
     
     void AddTargets(int x, int y)
     {
-        Vector2Int[] dirs = {
+        Vector2Int[] dirs = new Vector2Int[]
+        {
             new Vector2Int(1,0),
             new Vector2Int(-1,0),
             new Vector2Int(0,1),
@@ -399,14 +444,11 @@ public class GridManager : MonoBehaviour
 
             if (nx >= 0 && nx < width && ny >= 0 && ny < height)
             {
-                if (!playerGrid[nx, ny].isClicked)
-                {
-                    Vector2Int newTarget = new Vector2Int(nx, ny);
+                Tile t = playerGrid[nx, ny];
 
-                    if (!targets.Contains(newTarget))
-                    {
-                        targets.Add(newTarget);
-                    }
+                if (!t.isClicked)
+                {
+                    targets.Add(new Vector2Int(nx, ny));
                 }
             }
         }
