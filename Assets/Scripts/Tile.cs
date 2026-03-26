@@ -76,7 +76,10 @@ public class Tile : MonoBehaviour
         if (isWaiting) return;
         
         isProcessingTurn = true;
-        skillManager.UseSkill(x, y);
+        
+        Vector3 targetPos = transform.position;
+        gridManager.ShootBullet(targetPos); 
+        skillManager.UseSkill(x, y); 
         StartCoroutine(EndTurnDelay());
         
         // 🖥️ Update UI
@@ -89,18 +92,6 @@ public class Tile : MonoBehaviour
         {
             gridManager.ShowPreview(x, y);
         }
-    }
-    
-    IEnumerator ReturnToPosition()
-    {
-        yield return new WaitForSeconds(0.4f);
-
-        // stop position
-        rb.linearVelocity = Vector3.zero;
-        rb.angularVelocity = Vector3.zero;
-
-        // back to start position
-        transform.position = startPosition;
     }
     
     public void TakeHit()
@@ -121,12 +112,20 @@ public class Tile : MonoBehaviour
         }
 
         // physics
-        if (rb != null)
-        {
-            rb.AddForce(Vector3.up * mass, ForceMode.Impulse);
-        }
+        rb.AddForce(Vector3.up * 3f, ForceMode.Impulse);
 
         StartCoroutine(ReturnToPosition());
+    }
+    
+    IEnumerator ReturnToPosition()
+    {
+        yield return new WaitForSeconds(0.3f);
+
+        // stop position
+        rb.linearVelocity = Vector3.zero;
+
+        // back to start position
+        transform.position = startPosition;
     }
     
     IEnumerator EndTurnDelay()

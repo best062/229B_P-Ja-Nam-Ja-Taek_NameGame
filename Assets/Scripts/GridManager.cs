@@ -24,6 +24,11 @@ public class GridManager : MonoBehaviour
     public Camera playerCam;
     public Camera enemyCam;
     
+    [Header("Bullet Settings")]
+    public GameObject bulletPrefab;
+    public Transform firePoint;
+    
+    //other setting
     public Tile[,] playerGrid;
     public Tile[,] enemyGrid;
     public bool isPlayerTurn = true;
@@ -314,6 +319,19 @@ public class GridManager : MonoBehaviour
         placementText.color = IsPlacementDone() ? Color.green : Color.white;
     }
     
+    public void ShootBullet(Vector3 targetPos)
+    {
+        GameObject bullet = Instantiate(bulletPrefab, firePoint.position, Quaternion.identity);
+
+        Rigidbody rb = bullet.GetComponent<Rigidbody>();
+
+        Vector3 dir = (targetPos - firePoint.position);
+
+        float speed = 20f;
+
+        rb.linearVelocity = dir.normalized * speed; 
+    }
+    
     public void UpdateUI()
     {
         int remaining = CountRemainingShips(enemyGrid); // นับฝั่ง enemy
@@ -366,7 +384,7 @@ public class GridManager : MonoBehaviour
 
         for (int i = 0; i < shots; i++)
         {
-            yield return new WaitForSeconds(Random.Range(0.5f, 0.9f));
+            yield return new WaitForSeconds(Random.Range(0.5f , 0.9f));
 
             int x, y;
 
@@ -417,6 +435,7 @@ public class GridManager : MonoBehaviour
             }
         }
 
+        yield return new WaitForSeconds(1f);
         // 🔄 จบเทิร์น AI
         isAITurnRunning = false;
         isPlayerTurn = true;
