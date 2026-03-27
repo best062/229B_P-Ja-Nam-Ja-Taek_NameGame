@@ -35,6 +35,8 @@ public class GridManager : MonoBehaviour
     bool isAITurnRunning = false;
     List<Vector2Int> targets = new List<Vector2Int>();
     public bool isPlacingShips = true;
+    public SkillManager skillManager;
+    public bool isShooting = false;
     
     // boat sizes
     int[] shipSizes = {4, 3, 3, 2, 2, 1, 1};
@@ -70,6 +72,7 @@ public class GridManager : MonoBehaviour
         // Enemy ฝั่งขวา (ขยับไป)
         GenerateGrid(enemyGrid, new Vector3(10, 0, 0), false);
         PlaceShip(enemyGrid, 4);
+        PlaceShip(enemyGrid, 3);
         PlaceShip(enemyGrid, 3);
         PlaceShip(enemyGrid, 2);
         PlaceShip(enemyGrid, 2);
@@ -321,15 +324,53 @@ public class GridManager : MonoBehaviour
     
     public void ShootBullet(Vector3 targetPos)
     {
+        if (isShooting) return; 
+        isShooting = true;      
+        
         GameObject bullet = Instantiate(bulletPrefab, firePoint.position, Quaternion.identity);
+        Bullet b = bullet.GetComponent<Bullet>();
+        
+        switch (skillManager.currentSkill)
+        {
+            case SkillManager.SkillType.Bomb:
+                if (skillManager.bombCount > 0)
+                {
+                    skillManager.bombCount--;
+                }
+                break;
+
+            case SkillManager.SkillType.Scan:
+                if (skillManager.scanCount > 0)
+                {
+                    skillManager.scanCount--;
+                }
+                break;
+        }
 
         Rigidbody rb = bullet.GetComponent<Rigidbody>();
+        b.skillType = skillManager.currentSkill;
+        b.skillManager = skillManager;
+        
+        Vector3 start = firePoint.position;
+        Vector3 end = targetPos;
 
-        Vector3 dir = (targetPos - firePoint.position);
+        float height = 3f; 
 
-        float speed = 20f;
+        Vector3 gravity = Physics.gravity;
 
-        rb.linearVelocity = dir.normalized * speed; 
+        // แยกแกน
+        Vector3 displacement = end - start;
+        Vector3 displacementXZ = new Vector3(displacement.x, 0, displacement.z);
+
+        float time = Mathf.Sqrt(-2 * height / gravity.y) + Mathf.Sqrt(2 * (displacement.y - height) / gravity.y);
+
+        Vector3 velocityY = Vector3.up * Mathf.Sqrt(-2 * gravity.y * height);
+        Vector3 velocityXZ = displacementXZ / time;
+
+        Vector3 finalVelocity = velocityXZ + velocityY;
+
+        rb.linearVelocity = finalVelocity; 
+        skillManager.UpdateSkillUI();
     }
     
     public void UpdateUI()

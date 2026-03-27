@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 2528142021228815873}
   - component: {fileID: 4667701347592121158}
   - component: {fileID: 2977398224460908588}
-  - component: {fileID: 6028548971186881022}
+  - component: {fileID: 2248360248251429072}
   m_Layer: 0
   m_Name: tile
   m_TagString: Untagged
@@ -136,7 +136,7 @@ MonoBehaviour:
   defaultColor: {r: 1, g: 1, b: 1, a: 1}
   mass: 3
   state: 0
---- !u!54 &6028548971186881022
+--- !u!54 &2248360248251429072
 Rigidbody:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -159,7 +159,7 @@ Rigidbody:
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
   m_UseGravity: 0
-  m_IsKinematic: 0
+  m_IsKinematic: 1
   m_Interpolate: 0
   m_Constraints: 122
-  m_CollisionDetection: 0
+  m_CollisionDetection: 1

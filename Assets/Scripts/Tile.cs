@@ -3,7 +3,7 @@ using System.Collections;
 
 public class Tile : MonoBehaviour
 {
-    private GridManager gridManager;
+    public GridManager gridManager;
     private Renderer rend;
     private Rigidbody rb;
     private Vector3 startPosition;
@@ -29,7 +29,7 @@ public class Tile : MonoBehaviour
         rend = GetComponent<Renderer>();
         rb = GetComponent<Rigidbody>();
         skillManager = FindFirstObjectByType<SkillManager>();
-
+        
         startPosition = transform.position;
         gridManager = FindFirstObjectByType(typeof(GridManager)) as GridManager;
         if (!isPlayerTile)
@@ -55,6 +55,7 @@ public class Tile : MonoBehaviour
     // Update is called once per frame
     void OnMouseDown()
     {
+        if (gridManager.isShooting) return;
         if (gridManager.isPlacingShips && isPlayerTile)
         {
             gridManager.PlaceShipManual(x, y);
@@ -77,9 +78,7 @@ public class Tile : MonoBehaviour
         
         isProcessingTurn = true;
         
-        Vector3 targetPos = transform.position;
-        gridManager.ShootBullet(targetPos); 
-        skillManager.UseSkill(x, y); 
+        gridManager.ShootBullet(transform.position);
         StartCoroutine(EndTurnDelay());
         
         // 🖥️ Update UI
@@ -99,6 +98,8 @@ public class Tile : MonoBehaviour
         if (isClicked) return;
 
         isClicked = true;
+        
+        StartCoroutine(Bounce());
 
         if (hasShip)
         {
@@ -110,20 +111,14 @@ public class Tile : MonoBehaviour
             state = TileState.Miss;
             rend.material.color = Color.red;
         }
-
-        // physics
-        rb.AddForce(Vector3.up * 3f, ForceMode.Impulse);
-
+        
         StartCoroutine(ReturnToPosition());
     }
     
     IEnumerator ReturnToPosition()
     {
         yield return new WaitForSeconds(0.3f);
-
-        // stop position
-        rb.linearVelocity = Vector3.zero;
-
+        
         // back to start position
         transform.position = startPosition;
     }
@@ -135,5 +130,18 @@ public class Tile : MonoBehaviour
         isProcessingTurn = false;
         isWaiting = false;
         gridManager.EndPlayerTurn();
+    }
+    
+    IEnumerator Bounce()
+    {
+        rb.isKinematic = false; // ⭐ เปิด physics ชั่วคราว
+
+        rb.AddForce(Vector3.up * 4f, ForceMode.Impulse);
+
+        yield return new WaitForSeconds(0.2f);
+        
+        transform.position = startPosition;
+
+        rb.isKinematic = true; // ⭐ ล็อกกลับ
     }
 }

@@ -148,8 +148,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cea4419199519e1418f440cc46cc2398, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Bullet
-  skillManager: {fileID: 604696619}
-  skillType: 0
 --- !u!4 &109197969
 Transform:
   m_ObjectHideFlags: 0
@@ -1230,7 +1228,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'Remaining: 7'
+  m_text: 'Remaining: 6'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -2378,7 +2376,6 @@ MonoBehaviour:
   firePoint: {fileID: 109197969}
   isPlayerTurn: 1
   isPlacingShips: 1
-  skillManager: {fileID: 604696619}
   isHorizontal: 1
 --- !u!4 &1655909506
 Transform:
@@ -2464,7 +2461,7 @@ BoxCollider:
   m_LayerOverridePriority: 0
   m_IsTrigger: 0
   m_ProvidesContacts: 0
-  m_Enabled: 0
+  m_Enabled: 1
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}

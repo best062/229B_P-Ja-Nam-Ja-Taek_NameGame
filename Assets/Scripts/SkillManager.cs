@@ -82,7 +82,7 @@ public class SkillManager : MonoBehaviour
     } 
     
     // BOMB
-    void BombAttack(int x, int y)
+    public void BombAttack(int x, int y)
     {
         int[,] dirs = new int[,]
         {
@@ -107,7 +107,7 @@ public class SkillManager : MonoBehaviour
     }
     
     // SCAN
-    void Scan(int x, int y)
+    public void Scan(int x, int y)
     {
         Tile t = gridManager.enemyGrid[x, y];
 
@@ -141,7 +141,7 @@ public class SkillManager : MonoBehaviour
     }
     
     //Update UI
-    void UpdateSkillUI()
+    public void UpdateSkillUI()
     {
         // 🔢 จำนวน
         bombText.text = "Skill: Bomb (" + bombCount + ")";
