@@ -6,6 +6,11 @@ using System.Collections;
 
 public class GridManager : MonoBehaviour
 {
+    public SkillManager skillManager;
+    public Tile[,] playerGrid;
+    public Tile[,] enemyGrid;
+    List<Vector2Int> targets = new List<Vector2Int>();
+    
     [Header("Grid Settings")]
     public GameObject tilePrefab;
     public int width = 7;
@@ -28,14 +33,14 @@ public class GridManager : MonoBehaviour
     public GameObject bulletPrefab;
     public Transform firePoint;
     
-    //other setting
-    public Tile[,] playerGrid;
-    public Tile[,] enemyGrid;
+    [Header("Effect Settings")]
+    public GameObject hitEffectPrefab;
+    public GameObject bombEffectPrefab;
+    
+    [Header("Other Settings")]
     public bool isPlayerTurn = true;
     bool isAITurnRunning = false;
-    List<Vector2Int> targets = new List<Vector2Int>();
     public bool isPlacingShips = true;
-    public SkillManager skillManager;
     public bool isShooting = false;
     
     // boat sizes
@@ -350,7 +355,8 @@ public class GridManager : MonoBehaviour
         Rigidbody rb = bullet.GetComponent<Rigidbody>();
         b.skillType = skillManager.currentSkill;
         b.skillManager = skillManager;
-        
+        b.gridManager = this;
+
         Vector3 start = firePoint.position;
         Vector3 end = targetPos;
 
@@ -572,5 +578,12 @@ public class GridManager : MonoBehaviour
             }
         }
         
+    }
+    
+    public IEnumerator EndTurnWithDelay(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+
+        EndPlayerTurn();
     }
 }

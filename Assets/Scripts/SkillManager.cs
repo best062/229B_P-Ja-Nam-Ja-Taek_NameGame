@@ -104,6 +104,9 @@ public class SkillManager : MonoBehaviour
             if (nx >= 0 && nx < gridManager.width &&
                 ny >= 0 && ny < gridManager.height)
             {
+                Tile t = gridManager.enemyGrid[nx, ny];
+                Vector3 pos = t.transform.position;
+                Instantiate(gridManager.bombEffectPrefab, pos, Quaternion.identity);
                 gridManager.enemyGrid[nx, ny].TakeHit();
             }
         }
@@ -169,5 +172,12 @@ public class SkillManager : MonoBehaviour
         {
             scanButton.image.color = Color.gray;
         }
+    }
+    
+    public void SetBackNormal()
+    {
+        currentSkill = SkillType.Normal;
+        UpdateSkillUI();
+        gridManager.UpdateTurnUI();
     }
 }

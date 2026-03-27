@@ -126,7 +126,7 @@ public class Tile : MonoBehaviour
     IEnumerator EndTurnDelay()
     {
         isWaiting = true;
-        yield return new WaitForSeconds(2f);
+        yield return new WaitForSeconds(3f);
         isProcessingTurn = false;
         isWaiting = false;
         gridManager.EndPlayerTurn();
