@@ -37,6 +37,11 @@ public class GridManager : MonoBehaviour
     public GameObject hitEffectPrefab;
     public GameObject bombEffectPrefab;
     
+    [Header("SFX Settings")]
+    public AudioClip shootSFX;
+    public AudioClip bombSFX;
+    public AudioClip scanSFX;
+    
     [Header("Other Settings")]
     public bool isPlayerTurn = true;
     bool isAITurnRunning = false;
@@ -374,6 +379,21 @@ public class GridManager : MonoBehaviour
         Vector3 velocityXZ = displacementXZ / time;
 
         Vector3 finalVelocity = velocityXZ + velocityY;
+        
+        switch (skillManager.currentSkill)
+        {
+            case SkillManager.SkillType.Normal:
+                AudioSource.PlayClipAtPoint(shootSFX, firePoint.position);
+                break;
+
+            case SkillManager.SkillType.Bomb:
+                AudioSource.PlayClipAtPoint(bombSFX, firePoint.position);
+                break;
+
+            case SkillManager.SkillType.Scan:
+                AudioSource.PlayClipAtPoint(scanSFX, firePoint.position);
+                break;
+        }
 
         rb.linearVelocity = finalVelocity; 
         skillManager.UpdateSkillUI();
@@ -398,12 +418,12 @@ public class GridManager : MonoBehaviour
         {
             case SkillManager.SkillType.Scan:
                 turnText.text = "Scan Mode";
-                turnText.color = Color.black;
+                turnText.color = Color.white;
                 break;
 
             case SkillManager.SkillType.Bomb:
                 turnText.text = "Bomb Ready";
-                turnText.color = Color.black;
+                turnText.color = Color.white;
                 break;
 
             default:
