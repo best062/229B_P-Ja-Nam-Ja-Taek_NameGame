@@ -19,10 +19,12 @@ public class Bullet : MonoBehaviour
             {
                 case SkillManager.SkillType.Normal:
                     t.TakeHit();
+                    t.gridManager.EndPlayerTurn();
                     break;
 
                 case SkillManager.SkillType.Bomb:
-                    skillManager.BombAttack(t.x, t.y); // ⭐ ใช้ของเดิม
+                    skillManager.BombAttack(t.x, t.y);
+                    t.gridManager.EndPlayerTurn();// ⭐ ใช้ของเดิม
                     break;
 
                 case SkillManager.SkillType.Scan:

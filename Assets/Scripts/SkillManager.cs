@@ -38,6 +38,7 @@ public class SkillManager : MonoBehaviour
     {
         currentSkill = SkillType.Normal;
         UpdateSkillUI();
+        gridManager.UpdateTurnUI();
     }
     public void SetBomb()
     {
@@ -45,6 +46,7 @@ public class SkillManager : MonoBehaviour
 
         currentSkill = SkillType.Bomb;
         UpdateSkillUI();
+        gridManager.UpdateTurnUI();
     }
     public void SetScan()
     {
@@ -52,6 +54,7 @@ public class SkillManager : MonoBehaviour
 
         currentSkill = SkillType.Scan;
         UpdateSkillUI();
+        gridManager.UpdateTurnUI();
     }
     
     // USE SKILL

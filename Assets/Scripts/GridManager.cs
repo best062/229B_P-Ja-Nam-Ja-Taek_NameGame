@@ -378,19 +378,33 @@ public class GridManager : MonoBehaviour
         int remaining = CountRemainingShips(enemyGrid); // นับฝั่ง enemy
         Remaining.text = "Remaining: " + remaining;
     }
-    
-    void UpdateTurnUI()
+
+    public void UpdateTurnUI()
     {
-        if (isPlayerTurn)
+        if (!isPlayerTurn)
         {
-            turnText.text = "Player Turn";
+            turnText.text = "Enemy Turn";
+            turnText.color = Color.red;
+            return;
         }
-        else
+
+        switch (skillManager.currentSkill)
         {
-            turnText.text = "AI Turn";
+            case SkillManager.SkillType.Scan:
+                turnText.text = "Scan Mode";
+                turnText.color = Color.black;
+                break;
+
+            case SkillManager.SkillType.Bomb:
+                turnText.text = "Bomb Ready";
+                turnText.color = Color.black;
+                break;
+
+            default:
+                turnText.text = "Player Turn";
+                turnText.color = Color.green;
+                break;
         }
-        
-        turnText.color = isPlayerTurn ? Color.green : Color.red;
     }
     
     public void EndPlayerTurn()
