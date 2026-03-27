@@ -2805,6 +2805,7 @@ MonoBehaviour:
   Remaining: {fileID: 781467827}
   Win: {fileID: 999650200}
   Lose: {fileID: 749866619}
+  EndCredits: {fileID: 976877414}
   turnText: {fileID: 1938263373}
   shipDestroyedText: {fileID: 750592286}
   placementText: {fileID: 1579409185}

@@ -21,6 +21,7 @@ public class GridManager : MonoBehaviour
     public TMP_Text Remaining;
     public GameObject Win;
     public GameObject Lose;
+    public GameObject EndCredits;
     public TMP_Text turnText;
     public GameObject shipDestroyedText;
     public TMP_Text placementText;
@@ -442,6 +443,7 @@ public class GridManager : MonoBehaviour
             Debug.Log("YOU WIN!");
             isGameOver = true;
             Win.SetActive(true);
+            EndCredits.SetActive(true);
             return;
         }
         
@@ -510,6 +512,7 @@ public class GridManager : MonoBehaviour
                 Debug.Log("YOU LOSE!");
                 isGameOver = true;
                 Lose.SetActive(true);
+                EndCredits.SetActive(true);
 
                 isAITurnRunning = false;
                 yield break;
